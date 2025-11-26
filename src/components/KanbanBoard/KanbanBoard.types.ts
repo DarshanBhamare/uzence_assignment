@@ -55,6 +55,7 @@ export interface KanbanColumnProps {
   tasks: Task[];
   onTaskClick?: (task: Task) => void;
   onTaskMove?: (taskId: string, targetColumnId: string) => void;
+  onAddTask?: (columnId: string) => void;
   className?: string;
 }
 

@@ -27,11 +27,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   const {
     dragState,
-    handleDragStart,
     handleDragOver,
     handleDragLeave,
     handleDrop,
-    handleDragEnd,
   } = useDragAndDrop(handleTaskMoveCallback);
 
   // Initialize keyboard navigation
@@ -156,7 +154,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 column={column}
                 tasks={tasks}
                 onTaskClick={handleTaskClick}
-                onTaskMove={onTaskMove}
                 onAddTask={handleAddTask}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}

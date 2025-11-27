@@ -1,4 +1,4 @@
-import React from 'react';
+// React is implicitly imported in JSX
 
 import './button.css';
 

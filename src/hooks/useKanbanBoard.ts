@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import type { Task, Column } from '../components/KanbanBoard/KanbanBoard.types';
 
 export interface UseKanbanBoardReturn {
@@ -7,13 +7,6 @@ export interface UseKanbanBoardReturn {
   focusedTaskIndex: number;
   selectTask: (taskId: string, columnIndex: number, taskIndex: number) => void;
   deselectTask: () => void;
-  moveTaskWithKeyboard: (
-    taskId: string,
-    fromColumnId: string,
-    toColumnId: string,
-    columns: Column[],
-    tasks: Task[],
-  ) => void;
   navigateWithArrows: (
     key: string,
     columns: Column[],
@@ -37,20 +30,8 @@ export const useKanbanBoard = (): UseKanbanBoardReturn => {
     setSelectedTaskId(null);
   }, []);
 
-  const moveTaskWithKeyboard = useCallback(
-    (taskId: string, fromColumnId: string, toColumnId: string, columns: Column[], tasks: Task[]) => {
-      // Validate move
-      const toColumn = columns.find((c) => c.id === toColumnId);
-      if (toColumn) {
-        const tasksInTargetColumn = tasks.filter((t) => t.columnId === toColumnId);
-        if (toColumn.wipLimit && tasksInTargetColumn.length >= toColumn.wipLimit) {
-          console.warn(`Cannot move task: WIP limit reached in ${toColumn.title}`);
-          return;
-        }
-      }
-    },
-    [],
-  );
+  // WIP limit validation is handled in navigateWithArrows
+  // This hook is exported for future enhancements
 
   const navigateWithArrows = useCallback(
     (
@@ -139,7 +120,6 @@ export const useKanbanBoard = (): UseKanbanBoardReturn => {
     focusedTaskIndex,
     selectTask,
     deselectTask,
-    moveTaskWithKeyboard,
     navigateWithArrows,
   };
 };

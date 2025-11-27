@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { KanbanColumnProps, Task } from './KanbanBoard.types';
+import type { KanbanColumnProps } from './KanbanBoard.types';
 import { KanbanCard } from './KanbanCard';
 import { Button } from '../primitives/Button';
 
@@ -7,7 +7,6 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   column,
   tasks,
   onTaskClick,
-  onTaskMove,
   onAddTask,
   onDragOver,
   onDrop,

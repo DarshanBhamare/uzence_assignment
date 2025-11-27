@@ -45,18 +45,17 @@ export const Avatar: React.FC<AvatarProps> = ({
         bg-gradient-to-br
         ${gradient}
         text-white
-        font-bold
+        font-semibold
+        font-sans
         flex
         items-center
         justify-center
         flex-shrink-0
-        shadow-md
-        ring-2
-        ring-white
-        hover:scale-110
-        hover:shadow-lg
+        shadow-card
+        ring-1 ring-white
+        hover:scale-105
         transition-all
-        duration-200
+        duration-150
         ${className}
       `}
       title={name}

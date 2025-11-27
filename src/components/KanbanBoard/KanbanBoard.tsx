@@ -127,9 +127,8 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           overflow-x-auto
           overflow-y-hidden
           bg-gradient-to-br
-          from-gray-50
-          via-blue-50/30
-          to-purple-50/20
+          from-neutral-50
+          via-neutral-50
           p-6
           ${className}
         `}
@@ -140,7 +139,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
         }}
       >
         <div
-          className="flex gap-5 min-w-fit items-start h-full pb-4"
+          className="flex gap-6 min-w-fit items-start h-full pb-6"
           role="group"
           aria-label="Kanban columns"
         >

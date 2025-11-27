@@ -51,18 +51,16 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         flex
         flex-col
         w-80
-        min-w-[320px]
-        bg-gradient-to-b from-gray-50 to-white
+        min-w-[260px]
+        bg-neutral-50
         rounded-2xl
-        p-5
-        shadow-lg
-        border-2
+        p-4
+        shadow-card
         transition-all
-        duration-300
-        hover:shadow-xl
+        duration-200
         ${isBeingDraggedOver || isDropZoneActive
-          ? 'border-blue-400 bg-blue-50/50 shadow-xl ring-2 ring-blue-200'
-          : 'border-gray-200 backdrop-blur-sm'
+          ? 'border-primary-300 bg-primary-50/40 shadow-card-hover ring-1 ring-primary-100'
+          : 'border border-neutral-200'
         }
         ${column.isCollapsed ? 'min-w-0' : ''}
         ${className}
@@ -74,33 +72,27 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       onDrop={handleDrop}
     >
       {/* Column Header */}
-      <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <div className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full shadow-md" />
-          <h2
-            className="font-bold text-gray-900 text-lg tracking-tight"
-            id={`column-${column.id}-title`}
-          >
-            {column.title}
-          </h2>
+      <div className="sticky top-0 z-10 bg-transparent pb-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-8 rounded-full bg-primary-500/30" aria-hidden />
+            <h2
+              className="font-semibold font-sans text-neutral-800 text-lg tracking-tight"
+              id={`column-${column.id}-title`}
+            >
+              {column.title}
+            </h2>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center justify-center min-w-[28px] h-7 text-sm font-semibold text-neutral-700 bg-white px-2.5 rounded-full shadow-sm border border-neutral-200">
+              {columnTasks.length}
+            </div>
+            {column.wipLimit && (
+              <div className="text-xs text-neutral-500">WIP {columnTasks.length}/{column.wipLimit}</div>
+            )}
+          </div>
         </div>
-        <span
-          className="
-            inline-flex items-center justify-center
-            min-w-[28px] h-7
-            text-sm font-bold
-            text-gray-700
-            bg-white
-            px-2.5
-            rounded-full
-            shadow-sm
-            border border-gray-200
-            ring-1 ring-gray-100
-          "
-          aria-label={`${columnTasks.length} tasks in ${column.title}`}
-        >
-          {columnTasks.length}
-        </span>
       </div>
 
       {/* WIP Limit Warning */}
@@ -146,7 +138,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
       {!column.isCollapsed && (
         <>
           <div
-            className="flex flex-col gap-3 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+            className="flex flex-col gap-4 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
             role="list"
             aria-labelledby={`column-${column.id}-title`}
           >
@@ -198,17 +190,13 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
 
           {/* Add Task Button */}
           {onAddTask && (
-            <div className="mt-4 pt-3 border-t border-gray-200">
+            <div className="mt-4 pt-3 border-t border-neutral-200">
               <Button
-                variant="outline"
+                variant="primary"
                 size="sm"
                 onClick={() => onAddTask(column.id)}
-                className="w-full"
-                leftIcon={
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                }
+                className="w-full rounded-full py-2"
+                leftIcon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>}
               >
                 Add Task
               </Button>

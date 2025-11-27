@@ -11,11 +11,11 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const variantClasses = {
-  primary: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl',
-  secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-900 shadow-sm hover:shadow-md',
-  danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl',
-  ghost: 'bg-transparent hover:bg-gray-100 text-gray-700',
-  outline: 'border-2 border-gray-300 hover:border-gray-400 bg-white hover:bg-gray-50 text-gray-700',
+  primary: 'bg-primary-500 hover:bg-primary-600 text-white shadow-card hover:shadow-card-hover',
+  secondary: 'bg-neutral-100 hover:bg-neutral-200 text-neutral-800 shadow-sm hover:shadow-md',
+  danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-card hover:shadow-card-hover',
+  ghost: 'bg-transparent hover:bg-neutral-100 text-neutral-800',
+  outline: 'border-2 border-neutral-200 hover:border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-800',
 };
 
 const sizeClasses = {
@@ -47,13 +47,13 @@ export const Button: React.FC<ButtonProps> = ({
         justify-center
         gap-2
         font-semibold
-        rounded-lg
+        rounded-full
         transition-all
-        duration-200
-        focus:outline-none
-        focus:ring-2
-        focus:ring-offset-2
-        focus:ring-blue-500
+        duration-150
+        ease-out
+        focus-visible:ring-2
+        focus-visible:ring-primary-500
+        focus-visible:ring-offset-2
         disabled:opacity-50
         disabled:cursor-not-allowed
         ${variantClasses[variant]}

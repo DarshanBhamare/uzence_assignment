@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Task, Priority, Assignee, Tag } from './KanbanBoard.types';
 import { PRIORITY_LEVELS } from './KanbanBoard.types';
 import { Modal } from '../primitives/Modal';
@@ -30,7 +30,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    priority: PRIORITY_LEVELS[1] as Priority, // medium
+    priority: PRIORITY_LEVELS[1] as Priority,
     dueDate: '',
     assigneeId: '',
     tagIds: [] as string[],
@@ -49,28 +49,17 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             : new Date(task.dueDate).toISOString().split('T')[0]
           : '',
         assigneeId: task.assignee?.id || '',
-        tagIds: task.tags?.map((tag) => tag.id) || [],
-        columnId: task.columnId,
+        tagIds: task.tags?.map((t) => t.id) || [],
+        columnId: task.columnId || columnId || '',
       });
     } else {
-      setFormData({
-        title: '',
-        description: '',
-        priority: PRIORITY_LEVELS[1] as Priority,
-        dueDate: '',
-        assigneeId: '',
-        tagIds: [],
-        columnId: columnId || '',
-      });
+      setFormData((s) => ({ ...s, columnId: columnId || s.columnId }));
     }
   }, [task, columnId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!formData.title.trim()) {
-      return;
-    }
+    if (!formData.title.trim()) return;
 
     const assignee = availableAssignees.find((a) => a.id === formData.assigneeId);
     const tags = availableTags.filter((t) => formData.tagIds.includes(t.id));
@@ -84,7 +73,6 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       tags,
       columnId: formData.columnId,
     });
-
     onClose();
   };
 
@@ -98,272 +86,124 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   const toggleTag = (tagId: string) => {
     setFormData((prev) => ({
       ...prev,
-      tagIds: prev.tagIds.includes(tagId)
-        ? prev.tagIds.filter((id) => id !== tagId)
-        : [...prev.tagIds, tagId],
+      tagIds: prev.tagIds.includes(tagId) ? prev.tagIds.filter((id) => id !== tagId) : [...prev.tagIds, tagId],
     }));
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={isEditMode ? 'Edit Task' : 'Create New Task'}
-      size="lg"
-    >
-      <form onSubmit={handleSubmit} className="p-6">
-        <div className="space-y-6">
-          {/* Title */}
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditMode ? 'Edit Task' : 'New Task'} size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-neutral-700">Title</label>
+          <input
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            placeholder="Task title"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-neutral-700">Description</label>
+          <textarea
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
+            rows={4}
+            placeholder="Enter task description"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-semibold text-gray-700 mb-2"
+            <label className="block text-sm font-medium text-neutral-700">Priority</label>
+            <select
+              value={formData.priority}
+              onChange={(e) => setFormData({ ...formData, priority: e.target.value as Priority })}
+              className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
-              Title <span className="text-red-500">*</span>
-            </label>
+              {PRIORITY_LEVELS.map((p) => (
+                <option key={p} value={p}>
+                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700">Due Date</label>
             <input
-              id="title"
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className="
-                w-full
-                px-4
-                py-2
-                border
-                border-gray-300
-                rounded-lg
-                focus:ring-2
-                focus:ring-blue-500
-                focus:border-blue-500
-                outline-none
-                transition-all
-              "
-              placeholder="Enter task title"
+              type="date"
+              value={formData.dueDate}
+              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             />
           </div>
+        </div>
 
-          {/* Description */}
+        {availableAssignees.length > 0 && (
           <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-semibold text-gray-700 mb-2"
+            <label className="block text-sm font-medium text-neutral-700">Assignee</label>
+            <select
+              value={formData.assigneeId}
+              onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })}
+              className="mt-1 block w-full rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
             >
-              Description
-            </label>
-            <textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-              className="
-                w-full
-                px-4
-                py-2
-                border
-                border-gray-300
-                rounded-lg
-                focus:ring-2
-                focus:ring-blue-500
-                focus:border-blue-500
-                outline-none
-                transition-all
-                resize-none
-              "
-              placeholder="Enter task description"
-            />
+              <option value="">Unassigned</option>
+              {availableAssignees.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name}
+                </option>
+              ))}
+            </select>
           </div>
+        )}
 
-          {/* Priority and Due Date Row */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* Priority */}
-            <div>
-              <label
-                htmlFor="priority"
-                className="block text-sm font-semibold text-gray-700 mb-2"
-              >
-                Priority
-              </label>
-              <select
-                id="priority"
-                value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value as Priority })}
-                className="
-                  w-full
-                  px-4
-                  py-2
-                  border
-                  border-gray-300
-                  rounded-lg
-                  focus:ring-2
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                  outline-none
-                  transition-all
-                  bg-white
-                "
-              >
-                {PRIORITY_LEVELS.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Due Date */}
-            <div>
-              <label
-                htmlFor="dueDate"
-                className="block text-sm font-semibold text-gray-700 mb-2"
-              >
-                Due Date
-              </label>
-              <input
-                id="dueDate"
-                type="date"
-                value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                className="
-                  w-full
-                  px-4
-                  py-2
-                  border
-                  border-gray-300
-                  rounded-lg
-                  focus:ring-2
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                  outline-none
-                  transition-all
-                "
-              />
-            </div>
-          </div>
-
-          {/* Assignee */}
-          {availableAssignees.length > 0 && (
-            <div>
-              <label
-                htmlFor="assignee"
-                className="block text-sm font-semibold text-gray-700 mb-2"
-              >
-                Assignee
-              </label>
-              <select
-                id="assignee"
-                value={formData.assigneeId}
-                onChange={(e) => setFormData({ ...formData, assigneeId: e.target.value })}
-                className="
-                  w-full
-                  px-4
-                  py-2
-                  border
-                  border-gray-300
-                  rounded-lg
-                  focus:ring-2
-                  focus:ring-blue-500
-                  focus:border-blue-500
-                  outline-none
-                  transition-all
-                  bg-white
-                "
-              >
-                <option value="">Unassigned</option>
-                {availableAssignees.map((assignee) => (
-                  <option key={assignee.id} value={assignee.id}>
-                    {assignee.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Tags */}
-          {availableTags.length > 0 && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Tags
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {availableTags.map((tag) => (
+        {availableTags.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">Tags</label>
+            <div className="flex flex-wrap gap-2">
+              {availableTags.map((tag) => {
+                const active = formData.tagIds.includes(tag.id);
+                return (
                   <button
                     key={tag.id}
                     type="button"
                     onClick={() => toggleTag(tag.id)}
-                    className={`
-                      px-3
-                      py-1.5
-                      rounded-lg
-                      text-sm
-                      font-medium
-                      transition-all
-                      border-2
-                      ${
-                        formData.tagIds.includes(tag.id)
-                          ? 'bg-blue-100 border-blue-500 text-blue-700'
-                          : 'bg-gray-100 border-gray-300 text-gray-700 hover:border-gray-400'
-                      }
-                    `}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all border ${
+                      active ? 'bg-primary-50 border-primary-300 text-primary-700' : 'bg-neutral-100 border-neutral-200 text-neutral-700 hover:border-neutral-300'
+                    }`}
                     style={
-                      formData.tagIds.includes(tag.id) && tag.color
-                        ? {
-                            backgroundColor: tag.color + '20',
-                            borderColor: tag.color,
-                            color: tag.color,
-                          }
-                        : {}
+                      active && tag.color
+                        ? { backgroundColor: tag.color + '20', borderColor: tag.color, color: tag.color }
+                        : undefined
                     }
                   >
                     {tag.label}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            <div>
-              {isEditMode && onDelete && (
-                <Button
-                  type="button"
-                  variant="danger"
-                  size="md"
-                  onClick={handleDelete}
-                  leftIcon={
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  }
-                >
-                  Delete Task
-                </Button>
-              )}
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                size="md"
-                onClick={onClose}
-              >
-                Cancel
+        <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+          <div>
+            {isEditMode && onDelete && (
+              <Button type="button" variant="danger" onClick={handleDelete}>
+                Delete
               </Button>
-              <Button
-                type="submit"
-                variant="primary"
-                size="md"
-                leftIcon={
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                }
-              >
-                {isEditMode ? 'Save Changes' : 'Create Task'}
-              </Button>
-            </div>
+            )}
+          </div>
+
+          <div className="flex gap-3">
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary">
+              {isEditMode ? 'Save Changes' : 'Create Task'}
+            </Button>
           </div>
         </div>
       </form>

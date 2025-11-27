@@ -111,29 +111,23 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
         rounded-xl
         border-l-4
         ${priorityStyle.border}
-        border-r
-        border-t
-        border-b
-        border-gray-200
+        border
         ${priorityStyle.bg}
         p-4
-        shadow-sm
-        hover:shadow-xl
-        hover:scale-[1.02]
-        hover:-translate-y-0.5
+        shadow-card
+        hover:shadow-card-hover
+        hover:scale-[1.01]
         transition-all
-        duration-300
+        duration-150
         ease-out
         cursor-grab
         active:cursor-grabbing
         focus:outline-none
-        focus:ring-2
-        focus:ring-blue-500
-        focus:ring-offset-2
-        focus:ring-opacity-50
+        focus-visible:ring-2
+        focus-visible:ring-primary-500
+        focus-visible:ring-offset-2
         backdrop-blur-sm
-        ${isDragVisuallyActive ? 'opacity-50 scale-95' : ''}
-        ${isDragVisuallyActive ? 'cursor-grabbing' : 'hover:cursor-grab'}
+        ${isDragVisuallyActive ? 'opacity-60 scale-95' : ''}
         ${className}
       `}
       aria-label={`Task: ${task.title}`}
@@ -181,31 +175,17 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
 
         {/* Tags */}
         {task.tags && task.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {task.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="
-                  inline-flex items-center
-                  text-xs font-medium
-                  px-2.5 py-1
-                  rounded-md
-                  backdrop-blur-sm
-                  transition-all
-                  hover:scale-105
-                  shadow-sm
-                "
-                style={tag.color 
-                  ? { 
-                      backgroundColor: tag.color + '15', 
+                className="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full transition-all duration-150"
+                style={tag.color
+                  ? {
+                      backgroundColor: tag.color + '20',
                       color: tag.color,
-                      border: `1px solid ${tag.color}30`
-                    } 
-                  : {
-                      backgroundColor: '#f3f4f6',
-                      color: '#374151',
-                      border: '1px solid #e5e7eb'
                     }
+                  : { backgroundColor: '#f3f4f6', color: '#374151' }
                 }
               >
                 {tag.label}
@@ -235,17 +215,9 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
             )}
           </div>
           
-          <div className={`
-            flex items-center gap-1.5
-            px-2 py-0.5
-            rounded-full
-            text-xs font-semibold
-            ${priorityStyle.bg}
-            border border-gray-200
-            shadow-sm
-          `}>
-            <div className={`w-2 h-2 rounded-full ${priorityStyle.dot} shadow-sm animate-pulse`} />
-            <span className="text-gray-600 capitalize">{task.priority}</span>
+          <div className={`flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-semibold border ${isOverdue ? 'border-red-200 bg-red-50 text-red-600' : 'border-neutral-200 bg-neutral-50 text-neutral-700'}`}>
+            <div className={`w-2 h-2 rounded-full ${priorityStyle.dot} shadow-sm`} />
+            <span className="capitalize">{task.priority}</span>
           </div>
         </div>
       </div>

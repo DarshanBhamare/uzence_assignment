@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { KanbanColumnProps, Task } from './KanbanBoard.types';
 import { KanbanCard } from './KanbanCard';
 import { Button } from '../primitives/Button';
@@ -9,10 +9,42 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
   onTaskClick,
   onTaskMove,
   onAddTask,
+  onDragOver,
+  onDrop,
+  onDragLeave,
+  dragState,
   className = '',
 }) => {
+  const [isDropZoneActive, setIsDropZoneActive] = useState(false);
   const columnTasks = tasks.filter((task) => column.taskIds.includes(task.id));
   const wipWarning = column.wipLimit && columnTasks.length >= column.wipLimit;
+  const isBeingDraggedOver = dragState?.dragOverColumnId === column.id;
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDropZoneActive(true);
+    onDragOver?.(column.id, e);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if ((e.target as HTMLElement).classList.contains('drop-zone')) {
+      setIsDropZoneActive(false);
+      onDragLeave?.(e);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDropZoneActive(false);
+    onDrop?.(column.id, e);
+  };
+
+  const handleCardDragStart = (taskId: string, columnId: string, e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/json', JSON.stringify({ taskId, fromColumnId: columnId }));
+  };
 
   return (
     <div
@@ -25,18 +57,22 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
         rounded-2xl
         p-5
         shadow-lg
-        border border-gray-200
-        backdrop-blur-sm
-        h-fit
-        max-h-full
+        border-2
         transition-all
         duration-300
         hover:shadow-xl
+        ${isBeingDraggedOver || isDropZoneActive
+          ? 'border-blue-400 bg-blue-50/50 shadow-xl ring-2 ring-blue-200'
+          : 'border-gray-200 backdrop-blur-sm'
+        }
         ${column.isCollapsed ? 'min-w-0' : ''}
         ${className}
       `}
       role="region"
       aria-label={`Column: ${column.title}`}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
       {/* Column Header */}
       <div className="flex items-center justify-between mb-5 pb-3 border-b border-gray-200">
@@ -117,7 +153,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
           >
             {columnTasks.length === 0 ? (
               <div
-                className="
+                className={`
                   flex flex-col items-center justify-center
                   text-center
                   text-gray-400
@@ -125,13 +161,18 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   py-12
                   px-4
                   rounded-xl
-                  bg-gray-50
-                  border-2 border-dashed border-gray-300
-                "
+                  border-2 border-dashed
+                  transition-all
+                  duration-300
+                  ${isBeingDraggedOver || isDropZoneActive
+                    ? 'bg-blue-50 border-blue-300 text-blue-500'
+                    : 'bg-gray-50 border-gray-300'
+                  }
+                `}
                 role="status"
                 aria-label="No tasks in this column"
               >
-                <svg className="w-12 h-12 mb-2 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <p className="font-medium">No tasks</p>
@@ -148,6 +189,8 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({
                   <KanbanCard
                     task={task}
                     onClick={onTaskClick}
+                    onDragStart={handleCardDragStart}
+                    isDragging={dragState?.draggedTaskId === task.id}
                   />
                 </div>
               ))

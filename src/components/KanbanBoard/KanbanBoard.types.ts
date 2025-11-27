@@ -56,6 +56,15 @@ export interface KanbanColumnProps {
   onTaskClick?: (task: Task) => void;
   onTaskMove?: (taskId: string, targetColumnId: string) => void;
   onAddTask?: (columnId: string) => void;
+  onDragOver?: (columnId: string, e: React.DragEvent) => void;
+  onDrop?: (columnId: string, e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  dragState?: {
+    isDragging: boolean;
+    draggedTaskId: string | null;
+    sourceColumnId: string | null;
+    dragOverColumnId: string | null;
+  };
   className?: string;
 }
 

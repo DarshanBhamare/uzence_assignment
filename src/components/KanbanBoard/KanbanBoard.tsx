@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { KanbanBoardProps, Task } from './KanbanBoard.types';
 import { KanbanColumn } from './KanbanColumn';
 import { TaskModal } from './TaskModal';
+import { useDragAndDrop } from '../../hooks/useDragAndDrop';
+import { useKanbanBoard } from '../../hooks/useKanbanBoard';
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   columns,
@@ -16,10 +18,39 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [selectedTask, setSelectedTask] = useState<Task | undefined>();
   const [selectedColumnId, setSelectedColumnId] = useState<string | undefined>();
 
+  // Initialize drag-and-drop
+  const handleTaskMoveCallback = useCallback((taskId: string, fromColumnId: string, toColumnId: string) => {
+    if (onTaskMove) {
+      onTaskMove(taskId, fromColumnId, toColumnId);
+    }
+  }, [onTaskMove]);
+
+  const {
+    dragState,
+    handleDragStart,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleDragEnd,
+  } = useDragAndDrop(handleTaskMoveCallback);
+
+  // Initialize keyboard navigation
+  const {
+    selectedTaskId,
+    selectedColumnIndex,
+    selectTask,
+    navigateWithArrows,
+  } = useKanbanBoard();
+
   const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setSelectedColumnId(undefined);
     setIsModalOpen(true);
+    // Also select for keyboard navigation
+    const columnIndex = columns.findIndex((col) => col.id === task.columnId);
+    const tasksInColumn = tasks.filter((t) => t.columnId === task.columnId);
+    const taskIndex = tasksInColumn.findIndex((t) => t.id === task.id);
+    selectTask(task.id, columnIndex, taskIndex);
   };
 
   const handleAddTask = (columnId: string) => {
@@ -58,6 +89,21 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       onTaskDelete(taskId);
     }
   };
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        navigateWithArrows(e.key, columns, tasks, handleTaskMoveCallback);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedTaskId, selectedColumnIndex, columns, tasks, navigateWithArrows, handleTaskMoveCallback]);
 
   // Sample assignees and tags for the modal (in a real app, these would come from props or context)
   const availableAssignees = [
@@ -112,6 +158,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                 onTaskClick={handleTaskClick}
                 onTaskMove={onTaskMove}
                 onAddTask={handleAddTask}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                onDragLeave={handleDragLeave}
+                dragState={dragState}
               />
             </div>
           ))}

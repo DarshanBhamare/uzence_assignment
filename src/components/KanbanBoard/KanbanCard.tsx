@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Task, Priority } from './KanbanBoard.types';
 import { Avatar } from '../primitives/Avatar';
 
 export interface KanbanCardProps {
   task: Task;
   onClick?: (task: Task) => void;
+  onDragStart?: (taskId: string, columnId: string, e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
+  isDragging?: boolean;
   className?: string;
 }
 
@@ -60,8 +63,13 @@ const formatDate = (date: Date | string | undefined): string => {
 export const KanbanCard: React.FC<KanbanCardProps> = ({
   task,
   onClick,
+  onDragStart,
+  onDragEnd,
+  isDragging = false,
   className = '',
 }) => {
+  const [isDragginLocal, setIsDraggingLocal] = useState(false);
+
   const handleClick = () => {
     onClick?.(task);
   };
@@ -73,8 +81,19 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
     }
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    setIsDraggingLocal(true);
+    onDragStart?.(task.id, task.columnId, e);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    setIsDraggingLocal(false);
+    onDragEnd?.(e);
+  };
+
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
   const priorityStyle = priorityColors[task.priority];
+  const isDragVisuallyActive = isDragging || isDragginLocal;
 
   return (
     <div
@@ -82,6 +101,9 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
       tabIndex={0}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       className={`
         group
         relative
@@ -102,16 +124,20 @@ export const KanbanCard: React.FC<KanbanCardProps> = ({
         transition-all
         duration-300
         ease-out
-        cursor-pointer
+        cursor-grab
+        active:cursor-grabbing
         focus:outline-none
         focus:ring-2
         focus:ring-blue-500
         focus:ring-offset-2
         focus:ring-opacity-50
         backdrop-blur-sm
+        ${isDragVisuallyActive ? 'opacity-50 scale-95' : ''}
+        ${isDragVisuallyActive ? 'cursor-grabbing' : 'hover:cursor-grab'}
         ${className}
       `}
       aria-label={`Task: ${task.title}`}
+      aria-draggable="true"
     >
       {/* Priority Indicator Bar */}
       <div className={`absolute top-0 left-0 right-0 h-1 ${priorityStyle.indicator} rounded-t-xl opacity-60 group-hover:opacity-100 transition-opacity`} />

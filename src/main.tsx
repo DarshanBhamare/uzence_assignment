@@ -7,6 +7,8 @@ import { getSampleColumns, getSampleTasks } from './data/sampleBoard';
 
 const App = () => {
   const [columns, setColumns] = useState(getSampleColumns());
+
+  
   const [tasks, setTasks] = useState(getSampleTasks());
 
   const handleTaskMove = (taskId: string, fromColumnId: string, toColumnId: string) => {
